@@ -2,6 +2,8 @@
 
 A Chrome extension that connects to a Hugging Face Gradio backend to process YouTube videos and provide AI-powered Q&A about video content.
 
+> **Note:** This extension currently only works for YouTube videos with English transcripts.
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -40,48 +42,6 @@ const HF_APP_URL = "https://your-huggingface-app.hf.space";
 3. Enter the YouTube video URL
 4. Click "Process Video" to extract transcript and prepare for Q&A
 5. Ask questions about the video content!
-
-## 🎯 What YouTube Transcripts Look Like
-
-### High-Quality Manual Transcripts (TED Talks, Educational Content)
-```
-Hello everyone, today I want to talk about the future of artificial intelligence. 
-As we move forward into the 21st century, AI is becoming increasingly important 
-in our daily lives. From virtual assistants to autonomous vehicles, the impact 
-of AI is profound and far-reaching.
-
-Let me start with a story. A few years ago, I was working on a project that 
-involved teaching computers to understand human language. We were making good 
-progress, but there was one particular challenge that seemed insurmountable at the time.
-```
-
-### Auto-Generated Captions (Typical YouTube Videos)
-```
-[Music] hey guys welcome back to my channel today we're going to be talking 
-about um the latest smartphone release and um yeah so let's get started with 
-the first thing which is um the design so the phone comes in three colors 
-black white and um blue and the design is pretty much the same as last year's 
-model but with some minor changes um the camera bump is a bit bigger and um 
-the screen is slightly larger
-```
-
-### Live Stream Transcripts (with timestamps)
-```
-[00:00:15] Alright everyone, welcome to today's live coding session. 
-We're going to build a web application from scratch using React and Node.js.
-
-[00:00:30] First, let me show you what we're building. It's going to be a task 
-management app with user authentication and real-time updates.
-
-[00:01:00] Let's start by setting up our project structure. I'll create a new 
-directory and initialize our React app.
-```
-
-### Music Videos (Poor Quality)
-```
-[Music] [Music] [Music] [Music] [Music] [Music] [Music] [Music] 
-[Music] [Music] [Music] [Music] [Music] [Music] [Music] [Music] [Music]
-```
 
 ## 🧪 Testing Your Extension
 
@@ -204,4 +164,4 @@ If you encounter issues:
 2. Verify your Hugging Face app is running
 3. Check browser console for error messages
 4. Ensure all dependencies are installed
-5. Verify Webpack build completed successfully 
+5. Verify Webpack build completed successfully
