@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Chat API Extension",
+  "version": "2.0",
+  "description": "Connects to a Hugging Face backend to chat about a YouTube video.",
+  "permissions": [
+    "activeTab",
+    "tabs"
+  ],
+  "host_permissions": [
+    "*://*.youtube.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "Logo.png"
+  },
+  "icons": {
+    "128": "Logo.png"
+  }
+}

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>YouTube Video Chat</title>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🎥 ChatTube</div>
+            <div class="subtitle">AI-powered YouTube video chat</div>
+        </div>
+
+        <!-- Status Section -->
+        <div class="status-container">
+            <div id="status" class="status default" role="button" tabindex="0">
+                <span class="status-icon">▶️</span>
+                <span id="status-text">Ready to process this video. Click here!</span>
+            </div>
+        </div>
+
+        <!-- Video Processing Section -->
+        <div id="process-area" class="section">
+            <div class="section-title">
+                <span class="section-icon">🎬</span>
+                Process Video
+            </div>
+            <div class="input-group">
+                <input type="text" id="video-url-input" class="input-field" 
+                       placeholder="Paste YouTube video URL here..." />
+            </div>
+            <button id="process-video-btn" class="btn btn-primary">
+                <span class="btn-text">Process Video</span>
+            </button>
+        </div>
+
+        <!-- Chat Section -->
+        <div id="chat-area" class="chat-area">
+            <div class="section-title">
+                <span class="section-icon">💬</span>
+                Ask Questions
+            </div>
+            <div class="input-group">
+                <input type="text" id="question-input" class="input-field" 
+                       placeholder="Ask anything about the video..." />
+            </div>
+            <button id="ask-question-btn" class="btn btn-primary">
+                <span class="btn-text">Ask Question</span>
+            </button>
+            
+            <div class="response-container">
+                <div id="answer" class="response-box empty">
+                    Your AI response will appear here...
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Powered by Hugging Face Gradio
+        </div>
+    </div>
+
+    <!-- Load the bundled popup script -->
+    <script src="popup.js"></script>
+</body>
+</html>
+
