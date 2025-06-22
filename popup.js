@@ -102,16 +102,18 @@ async function handleGetTranscript() {
 }
 */
 
-const HF_APP_URL = "https://your-huggingface-app.hf.space"; 
+const HF_APP_URL = "https://neel692-youtube-transcript-rag.hf.space"; 
 
 // --- DOM Elements ---
 const processBtn = document.getElementById('process-video-btn');
 const askBtn = document.getElementById('ask-question-btn');
+const statusContainer = document.getElementById('status-container');
 const statusDiv = document.getElementById('status');
 const statusText = document.getElementById('status-text');
 const videoUrlInput = document.getElementById('video-url-input');
 const questionInput = document.getElementById('question-input');
 const answerDiv = document.getElementById('answer');
+const processArea = document.getElementById('process-area');
 const chatArea = document.getElementById('chat-area');
 
 // --- State ---
@@ -160,9 +162,11 @@ async function connectToGradio() {
 }
 
 // --- Event Handlers ---
-async function handleProcessVideo(url) {
+async function handleProcessVideo() {
+    const url = videoUrlInput.value;
     if (!url) {
-        updateStatus('Please enter a valid YouTube URL.', 'error');
+        // This case should ideally not be hit if the button is disabled, but as a safeguard:
+        alert('No video URL found. Make sure you are on a YouTube video page.');
         return;
     }
 
@@ -170,30 +174,40 @@ async function handleProcessVideo(url) {
         await connectToGradio();
         if (!gradioClient) return; // Connection failed
     }
-
+    
+    // UI updates for processing
+    processArea.style.display = 'none';
+    statusContainer.style.display = 'block';
     updateStatus('Processing video... This may take a moment.', 'loading');
-    processBtn.disabled = true;
-    videoUrlInput.disabled = true;
 
     try {
-        const result = await gradioClient.predict('/process_video', { video_url: url });
+        const result = await gradioClient.predict('/process_video_url', [url]);
         
-        if (result.data && result.data.error) {
-            throw new Error(result.data.error);
+        const output = result.data[0];
+        
+        if (output?.error) {
+            throw new Error(output.error);
         }
 
-        const successMessage = result.data?.message || "Video processed successfully!";
-        updateStatus(successMessage, 'success');
+        const successMessage = output?.message || "Video processed successfully!";
+        
+        // UI updates for success
+        statusContainer.style.display = 'none';
+        chatArea.style.display = 'block';
         videoProcessed = true;
-        chatArea.classList.add('visible');
-        processBtn.disabled = false;
-        videoUrlInput.disabled = false;
         answerDiv.innerHTML = 'You can now ask questions about the video.';
         answerDiv.classList.remove('empty');
 
     } catch (error) {
         console.error("Error processing video:", error);
+        
+        // UI updates for error
+        statusContainer.style.display = 'block';
+        chatArea.style.display = 'none';
         updateStatus(`Error: ${error.message}`, 'error');
+
+        // Allow user to try again
+        processArea.style.display = 'block';
         processBtn.disabled = false;
         videoUrlInput.disabled = false;
         videoProcessed = false;
@@ -217,13 +231,11 @@ async function handleAskQuestion() {
     answerDiv.innerHTML = 'Thinking...';
 
     try {
-        const result = await gradioClient.predict('/answer_question', { question });
+        const result = await gradioClient.predict('/answer_question', [question]);
         
-        if (result.data && result.data.error) {
-            throw new Error(result.data.error);
-        }
+        const answer = result.data[0];
 
-        const formattedAnswer = formatResponse(result.data.answer);
+        const formattedAnswer = formatResponse(answer);
         answerDiv.innerHTML = formattedAnswer;
         answerDiv.classList.remove('empty');
 
@@ -236,31 +248,33 @@ async function handleAskQuestion() {
     }
 }
 
-function handleProcessCurrentVideo() {
+function loadInitialURL() {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         const currentTab = tabs[0];
-        if (currentTab && currentTab.url && currentTab.url.includes('youtube.com/watch')) {
+        if (currentTab && currentTab.url && currentTab.url.includes("youtube.com/watch")) {
             videoUrlInput.value = currentTab.url;
-            handleProcessVideo(currentTab.url);
+            processBtn.disabled = false;
         } else {
-            updateStatus('Please navigate to a YouTube video page first.', 'error');
+            videoUrlInput.placeholder = "Not on a YouTube video page.";
+            videoUrlInput.disabled = true;
+            processBtn.disabled = true;
         }
     });
 }
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Auto-connect on load
+    // Connect to Gradio on startup
     connectToGradio();
 
-    // Event listeners
-    processBtn.addEventListener('click', () => handleProcessVideo(videoUrlInput.value));
-    askBtn.addEventListener('click', handleAskQuestion);
-    statusDiv.addEventListener('click', handleProcessCurrentVideo);
+    loadInitialURL();
 
+    // Setup event listeners
+    processBtn.addEventListener('click', handleProcessVideo);
+    askBtn.addEventListener('click', handleAskQuestion);
     questionInput.addEventListener('keyup', (event) => {
         if (event.key === 'Enter') {
             handleAskQuestion();
         }
     });
-}); 
+});

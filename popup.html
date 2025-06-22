@@ -11,14 +11,6 @@
             <div class="subtitle">AI-powered YouTube video chat</div>
         </div>
 
-        <!-- Status Section -->
-        <div class="status-container">
-            <div id="status" class="status default" role="button" tabindex="0">
-                <span class="status-icon">▶️</span>
-                <span id="status-text">Ready to process this video. Click here!</span>
-            </div>
-        </div>
-
         <!-- Video Processing Section -->
         <div id="process-area" class="section">
             <div class="section-title">
@@ -27,15 +19,23 @@
             </div>
             <div class="input-group">
                 <input type="text" id="video-url-input" class="input-field" 
-                       placeholder="Paste YouTube video URL here..." />
+                       placeholder="Loading YouTube video URL..." />
             </div>
             <button id="process-video-btn" class="btn btn-primary">
                 <span class="btn-text">Process Video</span>
             </button>
         </div>
 
+        <!-- Status Section -->
+        <div class="status-container" id="status-container" style="display: none;">
+            <div id="status" class="status loading" role="button" tabindex="0">
+                <span class="status-icon">▶️</span>
+                <span id="status-text">Processing video... This may take a moment.</span>
+            </div>
+        </div>
+
         <!-- Chat Section -->
-        <div id="chat-area" class="chat-area">
+        <div id="chat-area" class="chat-area" style="display: none;">
             <div class="section-title">
                 <span class="section-icon">💬</span>
                 Ask Questions
@@ -56,7 +56,7 @@
         </div>
 
         <div class="footer">
-            Powered by Hugging Face Gradio
+            Powered by Gemini
         </div>
     </div>
 

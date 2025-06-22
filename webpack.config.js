@@ -15,7 +15,7 @@ module.exports = {
       patterns: [
         { from: 'popup.html', to: 'popup.html' },
         { from: 'manifest.json', to: 'manifest.json' },
-        { from: 'ChatTube Icon Logo.png', to: 'ChatTube Icon Logo.png' },
+        { from: 'Logo.png', to: 'Logo.png' },
       ],
     }),
     // This makes the 'Buffer' class available to other modules
