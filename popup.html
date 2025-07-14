@@ -28,36 +28,28 @@
 
         <!-- Status Section -->
         <div class="status-container" id="status-container" style="display: none;">
-            <div id="status" class="status loading" role="button" tabindex="0">
-                <span class="status-icon">▶️</span>
-                <span id="status-text">Processing video... This may take a moment.</span>
+            <div id="status" class="status loading" role="status" tabindex="0">
+                <span class="spinner" id="spinner" aria-hidden="true"></span>
+                <span class="status-icon">⏳</span>
+                <span id="status-text">Processing transcript... Please wait.</span>
             </div>
         </div>
 
-        <!-- Chat Section -->
-        <div id="chat-area" class="chat-area" style="display: none;">
-            <div class="section-title">
-                <span class="section-icon">💬</span>
-                Ask Questions
-            </div>
-            <div class="input-group">
-                <input type="text" id="question-input" class="input-field" 
-                       placeholder="Ask anything about the video..." />
-            </div>
-            <button id="ask-question-btn" class="btn btn-primary">
-                <span class="btn-text">Ask Question</span>
-            </button>
-            
-            <div class="response-container">
-                <div id="answer" class="response-box empty">
-                    Your AI response will appear here...
+        <!-- Video Tools Card -->
+        <div class="tools-card">
+            <div id="output-viewer" class="summary-viewer"></div>
+            <div class="qa-section">
+                <div class="qa-input-row">
+                    <textarea id="question-input" class="input-field qa-input" placeholder="E.g., What’s the key takeaway from this video?" rows="2"></textarea>
+                    <button id="ask-btn" class="btn btn-primary qa-ask-btn">Ask</button>
                 </div>
             </div>
+            <div class="divider"><span>Or…</span></div>
+            <button id="summarize-btn" class="btn btn-secondary summarize-btn">Summarize Video</button>
         </div>
 
-        <div class="footer">
-            Powered by Gemini
-        </div>
+        <!-- Footer -->
+        <div class="footer powered-by-gemini">Powered by Gemini</div>
     </div>
 
     <!-- Load the bundled popup script -->

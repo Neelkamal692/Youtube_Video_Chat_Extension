@@ -106,15 +106,18 @@ const HF_APP_URL = "https://neel692-youtube-transcript-rag.hf.space";
 
 // --- DOM Elements ---
 const processBtn = document.getElementById('process-video-btn');
-const askBtn = document.getElementById('ask-question-btn');
 const statusContainer = document.getElementById('status-container');
 const statusDiv = document.getElementById('status');
 const statusText = document.getElementById('status-text');
 const videoUrlInput = document.getElementById('video-url-input');
-const questionInput = document.getElementById('question-input');
-const answerDiv = document.getElementById('answer');
 const processArea = document.getElementById('process-area');
-const chatArea = document.getElementById('chat-area');
+const videoInteractSection = document.getElementById('video-interact-section');
+const summarizeBtn = document.getElementById('summarize-btn');
+const summaryViewer = document.getElementById('summary-viewer');
+const questionInput = document.getElementById('question-input');
+const askBtn = document.getElementById('ask-btn');
+const answerViewer = document.getElementById('answer-viewer');
+const outputViewer = document.getElementById('output-viewer');
 
 // --- State ---
 let gradioClient = null;
@@ -161,90 +164,96 @@ async function connectToGradio() {
     }
 }
 
-// --- Event Handlers ---
 async function handleProcessVideo() {
     const url = videoUrlInput.value;
     if (!url) {
-        // This case should ideally not be hit if the button is disabled, but as a safeguard:
         alert('No video URL found. Make sure you are on a YouTube video page.');
         return;
     }
-
     if (!gradioClient) {
         await connectToGradio();
         if (!gradioClient) return; // Connection failed
     }
-    
     // UI updates for processing
-    processArea.style.display = 'none';
-    statusContainer.style.display = 'block';
+    if (processArea) processArea.style.display = 'none';
+    if (statusContainer) statusContainer.style.display = 'block';
     updateStatus('Processing video... This may take a moment.', 'loading');
-
+    if (outputViewer) {
+        outputViewer.style.display = 'none';
+        outputViewer.innerHTML = '';
+        outputViewer.classList.remove('visible');
+    }
     try {
         const result = await gradioClient.predict('/process_video_url', [url]);
-        
         const output = result.data[0];
-        
         if (output?.error) {
             throw new Error(output.error);
         }
-
-        const successMessage = output?.message || "Video processed successfully!";
-        
         // UI updates for success
-        statusContainer.style.display = 'none';
-        chatArea.style.display = 'block';
+        if (statusContainer) statusContainer.style.display = 'none';
+        if (videoInteractSection) videoInteractSection.style.display = 'flex';
         videoProcessed = true;
-        answerDiv.innerHTML = 'You can now ask questions about the video.';
-        answerDiv.classList.remove('empty');
-
+        if (outputViewer) outputViewer.style.display = 'block';
+        if (questionInput) questionInput.value = '';
     } catch (error) {
         console.error("Error processing video:", error);
-        
-        // UI updates for error
-        statusContainer.style.display = 'block';
-        chatArea.style.display = 'none';
+        if (statusContainer) statusContainer.style.display = 'block';
+        if (videoInteractSection) videoInteractSection.style.display = 'none';
         updateStatus(`Error: ${error.message}`, 'error');
-
-        // Allow user to try again
-        processArea.style.display = 'block';
-        processBtn.disabled = false;
-        videoUrlInput.disabled = false;
+        if (processArea) processArea.style.display = 'block';
+        if (processBtn) processBtn.disabled = false;
+        if (videoUrlInput) videoUrlInput.disabled = false;
         videoProcessed = false;
     }
 }
 
-async function handleAskQuestion() {
-    const question = questionInput.value;
-    if (!question) {
-        answerDiv.innerHTML = 'Please enter a question.';
-        return;
+// --- Streaming Helper ---
+async function streamText(element, formattedText, delay = 20) {
+    // Remove HTML tags for streaming, then re-apply after streaming
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = formattedText;
+    const plainText = tempDiv.textContent || tempDiv.innerText || '';
+    let streamed = '';
+    for (let i = 0; i < plainText.length; i++) {
+        streamed += plainText[i];
+        element.innerHTML = streamed;
+        await new Promise(res => setTimeout(res, delay));
     }
+    // After streaming, show formatted answer
+    element.innerHTML = formattedText;
+}
 
-    if (!videoProcessed) {
-        answerDiv.innerHTML = 'You must process a video before asking questions.';
-        return;
+async function handleSummarize() {
+    if (outputViewer) {
+        outputViewer.style.display = 'block';
+        outputViewer.classList.add('visible');
+        outputViewer.innerHTML = '<span class="empty">Loading summary...</span>';
     }
+    try {
+        const result = await gradioClient.predict('/answer_question', ['Summarize the transcript']);
+        const summary = result.data[0];
+        const formatted = formatResponse(summary);
+        if (outputViewer) await streamText(outputViewer, formatted);
+    } catch (error) {
+        if (outputViewer) outputViewer.innerHTML = `<span class="empty">An error occurred: ${error.message}</span>`;
+    }
+}
 
-    askBtn.disabled = true;
-    askBtn.classList.add('btn-loading');
-    answerDiv.innerHTML = 'Thinking...';
-
+async function handleAsk() {
+    const question = questionInput ? questionInput.value.trim() : '';
+    if (!question) return;
+    if (outputViewer) {
+        outputViewer.style.display = 'block';
+        outputViewer.classList.add('visible');
+        outputViewer.innerHTML = '<span class="empty">Loading answer...</span>';
+    }
     try {
         const result = await gradioClient.predict('/answer_question', [question]);
-        
         const answer = result.data[0];
-
-        const formattedAnswer = formatResponse(answer);
-        answerDiv.innerHTML = formattedAnswer;
-        answerDiv.classList.remove('empty');
-
+        const formatted = formatResponse(answer);
+        if (outputViewer) await streamText(outputViewer, formatted);
     } catch (error) {
-        console.error("Error asking question:", error);
-        answerDiv.innerHTML = `An error occurred: ${error.message}`;
-    } finally {
-        askBtn.disabled = false;
-        askBtn.classList.remove('btn-loading');
+        if (outputViewer) outputViewer.innerHTML = `<span class="empty">An error occurred: ${error.message}</span>`;
     }
 }
 
@@ -264,17 +273,14 @@ function loadInitialURL() {
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Connect to Gradio on startup
     connectToGradio();
-
     loadInitialURL();
-
-    // Setup event listeners
-    processBtn.addEventListener('click', handleProcessVideo);
-    askBtn.addEventListener('click', handleAskQuestion);
-    questionInput.addEventListener('keyup', (event) => {
+    if (processBtn) processBtn.addEventListener('click', handleProcessVideo);
+    if (summarizeBtn) summarizeBtn.addEventListener('click', handleSummarize);
+    if (askBtn) askBtn.addEventListener('click', handleAsk);
+    if (questionInput) questionInput.addEventListener('keyup', (event) => {
         if (event.key === 'Enter') {
-            handleAskQuestion();
+            handleAsk();
         }
     });
 });
